@@ -19,7 +19,7 @@ jobs:
 
       - name: Build
         id: build-iamge
-        users: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: latest ${{ github.sha }}
