@@ -20,6 +20,9 @@ jobs:
       - name: Parse tag
         run: echo "TAG=${GITHUB_REFS#refs/*/}" >> $GITHUB_ENV
 
+      - name: Debug
+        run: env
+
       - name: Build
         uses: redhat-actions/buildah-build@v2
         with:
