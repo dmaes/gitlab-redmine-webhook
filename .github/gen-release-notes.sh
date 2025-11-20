@@ -4,6 +4,8 @@ echo "Releasing ${CI_COMMIT_TAG}"
 
 CHANGELOG_FILE=CHANGELOG.md
 
+echo $GITHUB_REF
+
 VERSION="$(echo "$GITHUB_REF" | sed -E 's/^tags\/v//')"
 
 grep -E "^## \[v?${VERSION}\]" "$CHANGELOG_FILE" \
