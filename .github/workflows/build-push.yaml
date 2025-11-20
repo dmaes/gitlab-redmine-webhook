@@ -17,11 +17,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Parse tag
+        run: echo "TAG=${GITHUB_REFS#refs/*/}" >> $GITHUB_ENV
+
       - name: Build
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: latest ${{ github.ref }}
+          tags: latest ${{ env.TAG }}
           containerfiles: |
             ./Containerfile
 
