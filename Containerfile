@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+COPY gitlab-redmine.py .
 
 ENV GUNICORN_CMD_ARGS="--bind=0.0.0.0 --workers=1 --access-logfile=- --capture-output --error-logfile=-"
 
