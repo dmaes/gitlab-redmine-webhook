@@ -15,3 +15,12 @@ jobs:
 
       - name: Generate release notes
         run: .github/gen-release-notes.sh
+
+      - name: Create release
+        uses: comnoco/create-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body_path: .github/release_notes.md
