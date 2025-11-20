@@ -1,12 +1,12 @@
 #!/bin/bash
 
+set -eo pipefail
+
 echo "Releasing ${CI_COMMIT_TAG}"
 
 CHANGELOG_FILE=CHANGELOG.md
 
-echo $GITHUB_REF
-
-VERSION="$(echo "$GITHUB_REF" | sed -E 's/^tags\/v//')"
+VERSION="$(echo "$GITHUB_REF" | sed -E 's/^refs\/tags\/v//')"
 
 grep -E "^## \[v?${VERSION}\]" "$CHANGELOG_FILE" \
   | sed -E "s/^## \[v?${VERSION}\] (.+)$/# v${VERSION} \1/g" \
