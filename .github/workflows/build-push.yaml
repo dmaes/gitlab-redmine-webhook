@@ -20,9 +20,6 @@ jobs:
       - name: Parse tag
         run: echo "TAG=$(echo $GITHUB_REF | sed -E 's;^refs/tags/;;')" >> $GITHUB_ENV
 
-      - name: Debug
-        run: env
-
       - name: Build
         uses: redhat-actions/buildah-build@v2
         with:
@@ -41,6 +38,6 @@ jobs:
       - name: Build and push Container image to GitHub Container Registry
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }}
+          image: ${{ env.IMAGE_NAME }}
+          tags: latest ${{ env.TAG }}
           registry: ${{ env.REGISTRY }}
