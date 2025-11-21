@@ -1,0 +1,68 @@
+{{- with $.Values }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "grw.fullname" $ }}
+  namespace: {{ include "grw.namespace" $ }}
+  labels:
+    {{- include "grw.labels" $ | nindent 4 }}
+  {{- with .commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      {{- include "grw.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "grw.selectorLabels" $ | nindent 8 }}
+        {{- with .podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: gitlab-redmine-webhook
+          image: {{ include "grw.image" $ }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+
+          resources:
+            {{- toYaml .resources | nindent 12}}
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+
+          securityContext:
+            {{- toYaml .containerSecurityContext | nindent 12 }}
+
+      securityContext:
+        {{- toYaml .podSecurityContext | nindent 8 }}
+
+      serviceAccountName: {{ include "grw.serviceAccountName" $ }}
+{{- end }}
