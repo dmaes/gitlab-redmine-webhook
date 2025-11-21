@@ -17,3 +17,8 @@ repos:
       - id: yamllint
         args: ['--strict']
         exclude: '^helm-chart/templates/.*$'
+
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.14.2
+    hooks:
+      - id: helm-docs
