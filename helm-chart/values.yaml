@@ -1,0 +1,65 @@
+---
+
+# -- Provide a name in place of `gitlab-redmine-webhook`
+nameOverride: gitlab-redmine-webhook
+# -- String to fully overrdie `"grw.fullname"`
+fullnameOverride: ""
+# -- Override the namespace
+# @default -- `.Release.Namespace`
+namespaceOverride: ""
+
+# -- Additional labels to add on all resources
+commonLabels: {}
+# -- Additional annotations to add on all resources
+commonAnnotations: {}
+
+image:
+  # -- Image registry to pull from
+  registry: ghcr.io
+  # -- Image repository to pull from
+  repository: dmaes/gitlab-redmine-webhook
+  # -- Image tag to deploy
+  # @default -- `.Chart.appVersion`
+  tag: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    memory: 50Mi
+
+serviceAccount:
+  # -- Create a dedicated serviceAccount
+  create: false
+  # -- Name of the service account to use (and optionally create).
+  # Defaults to `"grw.fullname"` if `create = true`, or `default` otherwise.
+  name: ""
+
+# -- Container Security Context
+containerSecurityContext:
+  allowPrivilageEscalation: false
+  readOnlyRootFilesystem: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop: ['ALL']
+
+# -- Security Context for the entire pod.
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Additional labels to add on pods
+podLabels: {}
+# -- Additional annotations to add on pods
+podAnnotations: {}

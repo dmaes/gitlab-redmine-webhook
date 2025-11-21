@@ -1,0 +1,6 @@
+# vim: ft=yaml :
+---
+extends: relaxed
+rules:
+  line-length:
+    max: 100
