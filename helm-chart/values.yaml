@@ -24,10 +24,13 @@ image:
   # -- Image pull policy
   pullPolicy: IfNotPresent
 
+# -- Image Pull secrets
 imagePullSecrets: []
 
+# -- Amount of replicas to run
 replicas: 1
 
+# -- Container resources
 resources:
   requests:
     cpu: 10m
