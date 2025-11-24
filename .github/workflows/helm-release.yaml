@@ -9,9 +9,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
-    env:
-      CHANGELOG_FILE: helm-chart/CHANGELOG.md
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,13 +30,14 @@ jobs:
       - name: Generate release notes
         run: .github/gen-release-notes.sh
         env:
+          CHANGELOG_FILE: helm-chart/CHANGELOG.md
           # yamllint disable rule:line-length
           RELEASE_NOTES_PRE: |-
             ## Helm Chart
             `oci://ghcr.io/${{github.repository_owner}}/helm/gitlab-redmine-webhook --version ${{env.VERSION}}`
 
             ## Chart README
-            https://github.com/${{github.repository_owner}}/blob/helm-v${{env.VERSION}}/helm-chart/README.md
+            https://github.com/${{github.repository}}/blob/helm-v${{env.VERSION}}/helm-chart/README.md
           # yamllint enable rule:line-length
 
       - name: Create release
