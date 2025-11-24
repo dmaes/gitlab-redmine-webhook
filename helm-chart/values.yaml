@@ -1,0 +1,99 @@
+---
+
+# -- Provide a name in place of `gitlab-redmine-webhook`
+nameOverride: gitlab-redmine-webhook
+# -- String to fully overrdie `"grw.fullname"`
+fullnameOverride: ""
+# -- Override the namespace
+# @default -- `.Release.Namespace`
+namespaceOverride: ""
+
+# -- Additional labels to add on all resources
+commonLabels: {}
+# -- Additional annotations to add on all resources
+commonAnnotations: {}
+
+config:
+  # -- Provide your own secret, instead of creating one via this Chart
+  # Will be used as `envFrom`.
+  existingSecret: ""
+  # -- Add stakater reloader annotation
+  reloaderAnnotation: false
+  # -- Url to Redmine
+  REDMINE_URL: ""
+  # -- API Key to authenticate to Redmine
+  REDMINE_KEY: ""
+  # -- ID of the user that the `redmineKey` belongs too
+  REDMINE_USER_ID: ""
+  # -- Log level
+  LOG_LEVEL: "info"
+  # -- Log format
+  # Set to `json` to log in JSON format
+  LOG_FORMAT: ""
+
+image:
+  # -- Image registry to pull from
+  registry: ghcr.io
+  # -- Image repository to pull from
+  repository: dmaes/gitlab-redmine-webhook
+  # -- Image tag to deploy
+  # @default -- `.Chart.appVersion`
+  tag: ""
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Image Pull secrets
+imagePullSecrets: []
+
+# -- Amount of replicas to run
+replicas: 1
+
+# -- Container resources
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    memory: 50Mi
+
+serviceAccount:
+  # -- Create a dedicated serviceAccount
+  create: false
+  # -- Name of the service account to use (and optionally create).
+  # Defaults to `"grw.fullname"` if `create = true`, or `default` otherwise.
+  name: ""
+
+# -- Container Security Context
+containerSecurityContext:
+  allowPrivilageEscalation: false
+  readOnlyRootFilesystem: true
+  runAsUser: 65534
+  runAsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop: ['ALL']
+
+# -- Security Context for the entire pod.
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Additional labels to add on pods
+podLabels: {}
+# -- Additional annotations to add on pods
+podAnnotations: {}
+
+httproute:
+  # -- Create a HTTPRoute resource
+  enabled: false
+  # -- `.spec.parentRefs` to configure on the HTTPRoute
+  parentRefs: []
+  # -- `.spec.hostnames` to configure on the HTTProute
+  hostnames: []
+  # -- `.spec.rules[0].matches` to configure on the HTTPRoute
+  matches:
+    - path:
+        type: PathPrefix
+        value: /

@@ -1,0 +1,19 @@
+{{- with .Values }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grw.fullname" $ }}
+  namespace: {{ include "grw.namespace" $ }}
+  labels:
+    {{- include "grw.labels" $ | nindent 4 }}
+  {{- with .commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  REDMINE_URL: "{{ .config.REDMINE_URL }}"
+  REDMINE_USER_ID: "{{ .config.REDMINE_USER_ID }}"
+  LOG_LEVEL: "{{ .config.LOG_LEVEL }}"
+  LOG_FORMAT: "{{ .config.LOG_FORMAT }}"
+{{- end }}
