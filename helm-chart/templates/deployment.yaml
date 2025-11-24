@@ -7,9 +7,14 @@ metadata:
   namespace: {{ include "grw.namespace" $ }}
   labels:
     {{- include "grw.labels" $ | nindent 4 }}
-  {{- with .commonAnnotations }}
+  {{- if (or .commonAnnotations .config.reloaderAnnotation) }}
   annotations:
+    {{- if .config.reloaderAnnotation }}
+    reloader.stakater.com/auto: 'true'
+    {{- end }}
+    {{- with .commonAnnotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   replicas: {{ .replicas }}
@@ -23,10 +28,14 @@ spec:
         {{- with .podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") $ | sha256sum }}
+        {{- if (not .config.existingSecret) }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") $ | sha256sum }}
+        {{- end }}
+        {{- with .podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
     spec:
       {{- with .imagePullSecrets }}
       imagePullSecrets:
@@ -36,6 +45,16 @@ spec:
         - name: gitlab-redmine-webhook
           image: {{ include "grw.image" $ }}
           imagePullPolicy: {{ .image.pullPolicy }}
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "grw.fullname" $ }}
+            - secretRef:
+              {{- if .config.existingSecret }}
+                name: {{ .config.existingSecret }}
+              {{- else }}
+                name: {{ include "grw.fullname" $ }}
+              {{- end }}
 
           ports:
             - containerPort: 8000

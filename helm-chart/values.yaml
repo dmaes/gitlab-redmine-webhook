@@ -13,6 +13,24 @@ commonLabels: {}
 # -- Additional annotations to add on all resources
 commonAnnotations: {}
 
+config:
+  # -- Provide your own secret, instead of creating one via this Chart
+  # Will be used as `envFrom`.
+  existingSecret: ""
+  # -- Add stakater reloader annotation
+  reloaderAnnotation: false
+  # -- Url to Redmine
+  REDMINE_URL: ""
+  # -- API Key to authenticate to Redmine
+  REDMINE_KEY: ""
+  # -- ID of the user that the `redmineKey` belongs too
+  REDMINE_USER_ID: ""
+  # -- Log level
+  LOG_LEVEL: "info"
+  # -- Log format
+  # Set to `json` to log in JSON format
+  LOG_FORMAT: ""
+
 image:
   # -- Image registry to pull from
   registry: ghcr.io

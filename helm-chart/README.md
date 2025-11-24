@@ -20,6 +20,13 @@
 |-----|------|---------|-------------|
 | commonAnnotations | object | `{}` | Additional annotations to add on all resources |
 | commonLabels | object | `{}` | Additional labels to add on all resources |
+| config.LOG_FORMAT | string | `""` | Log format Set to `json` to log in JSON format |
+| config.LOG_LEVEL | string | `"info"` | Log level |
+| config.REDMINE_KEY | string | `""` | API Key to authenticate to Redmine |
+| config.REDMINE_URL | string | `""` | Url to Redmine |
+| config.REDMINE_USER_ID | string | `""` | ID of the user that the `redmineKey` belongs too |
+| config.existingSecret | string | `""` | Provide your own secret, instead of creating one via this Chart Will be used as `envFrom`. |
+| config.reloaderAnnotation | bool | `false` | Add stakater reloader annotation |
 | containerSecurityContext | object | `{"allowPrivilageEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Container Security Context |
 | fullnameOverride | string | `""` | String to fully overrdie `"grw.fullname"` |
 | httproute.enabled | bool | `false` | Create a HTTPRoute resource |
