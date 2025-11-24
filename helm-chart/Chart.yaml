@@ -9,3 +9,6 @@ sources:
 maintainers:
   - name: dmaes
     url: https://github.com/dmaes
+annotations:
+  org.opencontainers.image.documentation: >-
+    https://github.com/dmaes/gitlab-redmine-webhook/blob/helm-v0.1.0/helm-chart/README.md
