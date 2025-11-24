@@ -11,12 +11,6 @@ jobs:
 
     env:
       CHANGELOG_FILE: helm-chart/CHANGELOG.md
-      RELEASE_NOTES_PRE: |-
-        ## Helm Chart
-        `oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/helm/gitlab-redmine-webhook --version ${VERSION}`
-
-        ## Chart README
-        ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/helm-v${VERSION}/helm-chart/README.md
 
     steps:
       - name: Checkout
@@ -38,6 +32,15 @@ jobs:
 
       - name: Generate release notes
         run: .github/gen-release-notes.sh
+        env:
+          # yamllint disable rule:line-length
+          RELEASE_NOTES_PRE: |-
+            ## Helm Chart
+            `oci://ghcr.io/${{env.GITHUB_REPOSITORY_OWNER}}/helm/gitlab-redmine-webhook --version ${{env.VERSION}}`
+
+            ## Chart README
+            ${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}/blob/helm-v${{env.VERSION}}/helm-chart/README.md
+          # yamllint enable rule:line-length
 
       - name: Create release
         uses: softprops/action-gh-release@v2
