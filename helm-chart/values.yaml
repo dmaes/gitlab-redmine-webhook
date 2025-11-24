@@ -66,3 +66,16 @@ podSecurityContext:
 podLabels: {}
 # -- Additional annotations to add on pods
 podAnnotations: {}
+
+httproute:
+  # -- Create a HTTPRoute resource
+  enabled: false
+  # -- `.spec.parentRefs` to configure on the HTTPRoute
+  parentRefs: []
+  # -- `.spec.hostnames` to configure on the HTTProute
+  hostnames: []
+  # -- `.spec.rules[0].matches` to configure on the HTTPRoute
+  matches:
+    - path:
+        type: PathPrefix
+        value: /

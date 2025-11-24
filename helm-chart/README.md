@@ -22,6 +22,10 @@
 | commonLabels | object | `{}` | Additional labels to add on all resources |
 | containerSecurityContext | object | `{"allowPrivilageEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Container Security Context |
 | fullnameOverride | string | `""` | String to fully overrdie `"grw.fullname"` |
+| httproute.enabled | bool | `false` | Create a HTTPRoute resource |
+| httproute.hostnames | list | `[]` | `.spec.hostnames` to configure on the HTTProute |
+| httproute.matches | list | `[{"path":{"type":"PathPrefix","value":"/"}}]` | `.spec.rules[0].matches` to configure on the HTTPRoute |
+| httproute.parentRefs | list | `[]` | `.spec.parentRefs` to configure on the HTTPRoute |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.registry | string | `"ghcr.io"` | Image registry to pull from |
 | image.repository | string | `"dmaes/gitlab-redmine-webhook"` | Image repository to pull from |
