@@ -25,7 +25,7 @@ jobs:
           version: v3.19.2
 
       - name: Package and push Helm Chart
-        run: ./github/helm-package-push.sh
+        run: .github/helm-package-push.sh
         env:
           HELM_USERNAME: ${{ github.actor }}
           HELM_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
