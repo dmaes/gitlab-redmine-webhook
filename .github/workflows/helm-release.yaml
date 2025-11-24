@@ -11,6 +11,12 @@ jobs:
 
     env:
       CHANGELOG_FILE: helm-chart/CHANGELOG.md
+      RELEASE_NOTES_PRE: |-
+        ## Helm Chart
+        `oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/helm/gitlab-redmine-webhook --version ${VERSION}`
+
+        ## Chart README
+        ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/helm-v${VERSION}/helm-chart/README.md
 
     steps:
       - name: Checkout
