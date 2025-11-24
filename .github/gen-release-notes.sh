@@ -15,10 +15,10 @@ grep -E "^## \[v?${VERSION}\]" "$CHANGELOG_FILE" \
 
 echo "" >> $NOTES
 
-echo "## Container image" >> $NOTES
-echo "\`ghcr.io/${GITHUB_REPOSITORY}:v${VERSION}\`" >> $NOTES
-
-echo "" >> $NOTES
+if [ ! -z "$RELEASE_NOTES_PRE" ]; then
+  echo "$RELEASE_NOTES_PRE" >> $NOTES
+  echo "" >> $NOTES
+fi
 
 echo "## Changelog" >> $NOTES
 sed -rn "/^## \[v?${VERSION}\]/,/^## \[/p" "$CHANGELOG_FILE" \

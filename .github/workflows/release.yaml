@@ -13,6 +13,10 @@ jobs:
       CT_REGISTRY: ghcr.io/${{ github.repository_owner }}
       CT_IMAGE_NAME: gitlab-redmine-webhook
       CHANGELOG_FILE: CHANGELOG.md
+      RELEASE_NOTES_PRE: |-
+        ## Container image
+        `ghcr.io/${GITHUB_REPOSITORY}:v${VERSION}`
+
 
     steps:
       - name: Checkout
