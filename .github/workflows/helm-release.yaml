@@ -36,10 +36,10 @@ jobs:
           # yamllint disable rule:line-length
           RELEASE_NOTES_PRE: |-
             ## Helm Chart
-            `oci://ghcr.io/${{env.GITHUB_REPOSITORY_OWNER}}/helm/gitlab-redmine-webhook --version ${{env.VERSION}}`
+            `oci://ghcr.io/${{github.repository_owner}}/helm/gitlab-redmine-webhook --version ${{env.VERSION}}`
 
             ## Chart README
-            ${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}/blob/helm-v${{env.VERSION}}/helm-chart/README.md
+            https://github.com/${{github.repository_owner}}/blob/helm-v${{env.VERSION}}/helm-chart/README.md
           # yamllint enable rule:line-length
 
       - name: Create release
