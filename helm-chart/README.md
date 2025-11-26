@@ -1,6 +1,6 @@
 # gitlab-redmine-webhook
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![AppVersion: v0.1.0](https://img.shields.io/badge/AppVersion-v0.1.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![AppVersion: v0.1.0](https://img.shields.io/badge/AppVersion-v0.1.0-informational?style=flat-square)
 
 **Homepage:** <https://github.com/dmaes/gitlab-redmine-webhook>
 
@@ -21,7 +21,7 @@
 | commonAnnotations | object | `{}` | Additional annotations to add on all resources |
 | commonLabels | object | `{}` | Additional labels to add on all resources |
 | config.LOG_FORMAT | string | `""` | Log format Set to `json` to log in JSON format |
-| config.LOG_LEVEL | string | `"info"` | Log level |
+| config.LOG_LEVEL | string | `"INFO"` | Log level |
 | config.REDMINE_KEY | string | `""` | API Key to authenticate to Redmine |
 | config.REDMINE_URL | string | `""` | Url to Redmine |
 | config.REDMINE_USER_ID | string | `""` | ID of the user that the `redmineKey` belongs too |
