@@ -22,7 +22,7 @@ spec:
 
   rules:
     - matches:
-        {{- toYaml .httpRoute.matches | nindent 8 }}
+        {{- toYaml .httproute.matches | nindent 8 }}
       backendRefs:
         - name: {{ include "grw.fullname" $ }}
           port: 8000
