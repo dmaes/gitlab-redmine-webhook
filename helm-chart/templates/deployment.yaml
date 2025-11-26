@@ -41,6 +41,12 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 10Mi
+
       containers:
         - name: gitlab-redmine-webhook
           image: {{ include "grw.image" $ }}
@@ -63,6 +69,10 @@ spec:
 
           resources:
             {{- toYaml .resources | nindent 12}}
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
 
           startupProbe:
             httpGet:
