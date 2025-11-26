@@ -1,6 +1,6 @@
 # gitlab-redmine-webhook
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: v0.1.0](https://img.shields.io/badge/AppVersion-v0.1.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![AppVersion: v0.1.0](https://img.shields.io/badge/AppVersion-v0.1.0-informational?style=flat-square)
 
 **Homepage:** <https://github.com/dmaes/gitlab-redmine-webhook>
 
@@ -27,7 +27,7 @@
 | config.REDMINE_USER_ID | string | `""` | ID of the user that the `redmineKey` belongs too |
 | config.existingSecret | string | `""` | Provide your own secret, instead of creating one via this Chart Will be used as `envFrom`. |
 | config.reloaderAnnotation | bool | `false` | Add stakater reloader annotation |
-| containerSecurityContext | object | `{"allowPrivilageEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Container Security Context |
+| containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":65534,"runAsUser":65534,"seccompProfile":{"type":"RuntimeDefault"}}` | Container Security Context |
 | fullnameOverride | string | `""` | String to fully overrdie `"grw.fullname"` |
 | httproute.enabled | bool | `false` | Create a HTTPRoute resource |
 | httproute.hostnames | list | `[]` | `.spec.hostnames` to configure on the HTTProute |

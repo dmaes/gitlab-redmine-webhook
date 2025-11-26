@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
 name: gitlab-redmine-webhook
-version: 0.1.0
+version: 0.1.1
 appVersion: v0.1.0
 home: https://github.com/dmaes/gitlab-redmine-webhook
 sources:
