@@ -20,7 +20,7 @@ ISSUE_RE = '(^| |\\n|\\(|\\[)#([0-9]+)(\\]|\\)| |\\n|$)'
 
 redmine_url = os.environ.get('REDMINE_URL')
 redmine_key = os.environ.get('REDMINE_KEY')
-my_user_id = os.environ.get('REDMINE_USER_ID')
+my_user_id = int(os.environ.get('REDMINE_USER_ID'))
 
 if not (redmine_url and redmine_key and my_user_id):
     print("Must specify REDMINE_URL, REDMINE_KEY and REDMINE_USER_ID")
@@ -125,6 +125,23 @@ def issue_has_mr_note(issue, event):
     return False
 
 
+def issue_has_commit_note(issue, event, sha):
+    project_escaped_link = re.escape(get_event_project_md_link(event))
+    header_re = re.compile(f"^[0-9]+ new commits pushed to {project_escaped_link} referencing this issue:")
+    commit_re = re.compile(f".+ \\* \\[{sha}\\].+")
+    project_url = event['project']['web_url']
+
+    for journal in issue.journals:
+        if journal.user.id == my_user_id and header_re.match(journal.notes):
+            log.debug(f"Found existing note on #{issue.id} for {project_url}")
+            if commit_re.match(journal.notes.replace("\n", ' ')):
+                log.debug(f"Found existing note on #{issue.id} for {sha} in {project_url}")
+                return True
+
+    log.debug(f"Found no existing note on #{issue.id} for {sha} in {project_url}")
+    return False
+
+
 def update_redmine_issue_mr(id, event):
     mr = event['object_attributes']
 
@@ -162,16 +179,23 @@ def update_redmine_issue_commits(id, event, commits):
     link = get_event_project_md_link(event)
     header = f"{c_len} new commits pushed to {link} referencing this issue:"
 
-    notes = [header]
+    commit_notes = []
 
     for commit in commits:
         sha = commit['id'][0:8]
         author = commit['author']['name']
         title = commit['title']
         url = commit['url']
-        notes.append(f"* [{sha}]({url}) {author}: {title}")
+        if not issue_has_commit_note(issue, event, sha):
+            commit_notes.append(f"* [{sha}]({url}) {author}: {title}")
 
-    issue.notes = "\n".join(notes)
+    if len(commit_notes) == 0:
+        return "skipped"
+
+    commit_note = "\n".join(commit_notes)
+    header = f"{len(commit_notes)} new commits pushed to {link} referencing this issue:"
+
+    issue.notes = f"{header}\n{commit_note}"
     issue.private_notes = True
     issue.save()
     return "updated"
