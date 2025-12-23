@@ -11,3 +11,20 @@ Webhook for Gitlab to link commits and MR's to referenced issues in Redmine
 | `REDMINE_USER_ID` | required | ID of the user to whom the API key belongs | |
 | `LOG_LEVEL` | optional | Log level | `INFO` |
 | `LOG_FORMAT` | optional | Set to `json` for json formatted logs | `` |
+
+## Endpoints
+
+### `/health`
+
+Returns `"OK"`
+
+### `/hook`
+
+#### Supported values for `X-Gitlab-Event`:
+
+* `Push Hook`
+* `Merge Request Hook`
+
+#### Additional supported headers
+
+* `X-GitlabRedmine-Private-Notes`: Set to `true` to create private notes instead of public ones (not case sensitive).

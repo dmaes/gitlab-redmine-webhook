@@ -156,7 +156,7 @@ def should_append_commits_to_last_note(issue, event):
     return None
 
 
-def update_redmine_issue_mr(id, event):
+def update_redmine_issue_mr(id, event, private_notes):
     mr = event['object_attributes']
 
     # No need to notify whenever new commits are pushed
@@ -177,13 +177,13 @@ def update_redmine_issue_mr(id, event):
 
     issue.notes = f"Merge Request {get_mr_link(event)} referencing this issue has been {action}."
 
-    issue.private_notes = True
+    issue.private_notes = private_notes
     issue.save()
 
     return "updated"
 
 
-def update_redmine_issue_commits(id, event, commits):
+def update_redmine_issue_commits(id, event, commits, private_notes):
     try:
         issue = redmine.issue.get(id)
     except ResourceNotFoundError:
@@ -220,7 +220,7 @@ def update_redmine_issue_commits(id, event, commits):
         header = f"{len(commit_notes)} new commits pushed to {link} referencing this issue:"
 
         issue.notes = f"{header}\n{commit_note}"
-        issue.private_notes = True
+        issue.private_notes = private_notes
         issue.save()
 
     return "updated"
@@ -255,17 +255,19 @@ class Hook(Resource):
 
     def handle_mr(self):
         event = request.get_json()
+        private_notes = (request.headers.get('X-GitlabRedmine-Private-Notes', '').lower() == 'true')
         res = dict()
         for issue in find_mr_issues(event):
-            res[issue] = update_redmine_issue_mr(issue, event)
+            res[issue] = update_redmine_issue_mr(issue, event, private_notes)
         return {'issues': res}
 
     def handle_push(self):
         event = request.get_json()
+        private_notes = (request.headers.get('X-GitlabRedmine-Private-Notes', '').lower() == 'true')
         issue_commits = find_commits_issues(event)
         res = dict()
         for issue, commits in issue_commits.items():
-            res[issue] = update_redmine_issue_commits(issue, event, commits)
+            res[issue] = update_redmine_issue_commits(issue, event, commits, private_notes)
         return {'issues': res}
 
 
