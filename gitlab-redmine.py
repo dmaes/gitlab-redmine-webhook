@@ -92,6 +92,18 @@ def find_mr_issues(event):
     return set(issues)
 
 
+def find_release_issues(event):
+    issues = []
+
+    for m in re.findall(ISSUE_RE, event['description']):
+        issues.append(m[1])
+
+    for m in re.findall(ISSUE_RE, event['commit']['message']):
+        issues.append(m[1])
+
+    return set(issues)
+
+
 def find_commits_issues(event):
     issueCommits = dict()
 
@@ -114,9 +126,25 @@ def get_mr_link(event):
     return f"[{project_path}!{mr['iid']}]({mr['url']})"
 
 
+def get_release_link(event):
+    project_path = event['project']['path_with_namespace']
+    return f"[{project_path} {event['name']}]({event['url']})"
+
+
 def issue_has_mr_note(issue, event):
     escaped_link = re.escape(get_mr_link(event))
     notes_re = re.compile(f"^Merge Request {escaped_link} referencing this issue .+$")
+
+    for journal in issue.journals:
+        if journal.user.id == my_user_id and notes_re.match(journal.notes):
+            return True
+
+    return False
+
+
+def issue_has_release_note(issue, event):
+    escaped_link = re.escape(get_release_link(event))
+    notes_re = re.compile(f"^Release {escaped_link} referencing this issue .+$")
 
     for journal in issue.journals:
         if journal.user.id == my_user_id and notes_re.match(journal.notes):
@@ -168,14 +196,35 @@ def update_redmine_issue_mr(id, event, private_notes):
     except ResourceNotFoundError:
         return "not found"
 
-    mr_action = mr['action']
-    action = f"{mr_action}d" if mr_action[-1] == 'e' else f"{mr_action}ed"
+    action = mr['action']
+    action = f"{action}d" if action[-1] == 'e' else f"{action}ed"
 
     # Not need to notify on every update
-    if mr_action == 'update' and issue_has_mr_note(issue, event):
+    if action == 'updated' and issue_has_mr_note(issue, event):
         return "skipped"
 
     issue.notes = f"Merge Request {get_mr_link(event)} referencing this issue has been {action}."
+
+    issue.private_notes = private_notes
+    issue.save()
+
+    return "updated"
+
+
+def update_redmine_issue_release(id, event, private_notes):
+    try:
+        issue = redmine.issue.get(id)
+    except ResourceNotFoundError:
+        return "not found"
+
+    action = event['action']
+    action = f"{action}d" if action[-1] == 'e' else f"{action}ed"
+
+    # Not need to notify on every update
+    if action == 'updated' and issue_has_release_note(issue, event):
+        return "skipped"
+
+    issue.notes = f"Release {get_release_link(event)} referencing this issue has been {action}."
 
     issue.private_notes = private_notes
     issue.save()
@@ -245,10 +294,12 @@ class Hook(Resource):
         event = request.headers.get("X-Gitlab-Event")
         self.log_request()
 
-        if event == 'Push Hook':
-            return self.handle_push()
-        elif event == 'Merge Request Hook':
+        if event == 'Merge Request Hook':
             return self.handle_mr()
+        elif event == 'Push Hook':
+            return self.handle_push()
+        elif event == 'Release Hook':
+            return self.handle_release()
         else:
             log.error(f"Unknown event type '{event}'")
             return {'error': f"Unknown event '{event}'"}, 400
@@ -268,6 +319,14 @@ class Hook(Resource):
         res = dict()
         for issue, commits in issue_commits.items():
             res[issue] = update_redmine_issue_commits(issue, event, commits, private_notes)
+        return {'issues': res}
+
+    def handle_release(self):
+        event = request.get_json()
+        private_notes = (request.headers.get('X-GitlabRedmine-Private-Notes', '').lower() == 'true')
+        res = dict()
+        for issue in find_release_issues(event):
+            res[issue] = update_redmine_issue_release(issue, event, private_notes)
         return {'issues': res}
 
 

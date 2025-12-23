@@ -22,8 +22,9 @@ Returns `"OK"`
 
 #### Supported values for `X-Gitlab-Event`:
 
-* `Push Hook`
 * `Merge Request Hook`
+* `Push Hook`
+* `Release Hook`
 
 #### Additional supported headers
 

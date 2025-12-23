@@ -10,6 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 * Append commits to last note, if that note is a commits note for the same project.
 * Allow choosing between private and public notes with `X-GitlabRedmine-Private-Notes: true`
 
+### Added
+* Support for Release events
+
 ## [0.1.1] - 2025-12-17
 
 ### Changed
