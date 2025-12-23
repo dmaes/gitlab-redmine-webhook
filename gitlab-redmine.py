@@ -142,6 +142,20 @@ def issue_has_commit_note(issue, event, sha):
     return False
 
 
+def should_append_commits_to_last_note(issue, event):
+    project_escaped_link = re.escape(get_event_project_md_link(event))
+    header_re = re.compile(f"^[0-9]+ new commits pushed to {project_escaped_link} referencing this issue:")
+
+    try:
+        *_, last_journal = issue.journals
+        if last_journal.user.id == my_user_id and header_re.match(last_journal.notes):
+            return last_journal
+    except ValueError:
+        pass
+
+    return None
+
+
 def update_redmine_issue_mr(id, event):
     mr = event['object_attributes']
 
@@ -192,12 +206,23 @@ def update_redmine_issue_commits(id, event, commits):
     if len(commit_notes) == 0:
         return "skipped"
 
-    commit_note = "\n".join(commit_notes)
-    header = f"{len(commit_notes)} new commits pushed to {link} referencing this issue:"
+    append_to = should_append_commits_to_last_note(issue, event)
+    if append_to:
+        log.debug(f"Appending commits to note {append_to} on #{issue.id}")
+        commit_notes = append_to.notes.split("\n")[1:] + commit_notes
+        commit_note = "\n".join(commit_notes)
+        header = f"{len(commit_notes)} new commits pushed to {link} referencing this issue:"
+        append_to.notes = f"{header}\n{commit_note}"
+        append_to.save()
+    else:
+        log.debug(f"Creating new note with commits on #{issue.id}")
+        commit_note = "\n".join(commit_notes)
+        header = f"{len(commit_notes)} new commits pushed to {link} referencing this issue:"
 
-    issue.notes = f"{header}\n{commit_note}"
-    issue.private_notes = True
-    issue.save()
+        issue.notes = f"{header}\n{commit_note}"
+        issue.private_notes = True
+        issue.save()
+
     return "updated"
 
 

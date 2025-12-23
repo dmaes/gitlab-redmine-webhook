@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+### Changed
+* Append commits to last note, if that note is a commits note for the same project.
+
 ## [0.1.1] - 2025-12-17
 
 ### Changed
