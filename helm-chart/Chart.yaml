@@ -1,8 +1,8 @@
 ---
 apiVersion: v2
 name: gitlab-redmine-webhook
-version: 0.1.5
-appVersion: v0.1.1
+version: 0.2.0
+appVersion: v0.2.0
 home: https://github.com/dmaes/gitlab-redmine-webhook
 sources:
   - https://github.com/dmaes/gitlab-redmine-webhook
@@ -11,4 +11,4 @@ maintainers:
     url: https://github.com/dmaes
 annotations:
   org.opencontainers.image.documentation: >-
-    https://github.com/dmaes/gitlab-redmine-webhook/blob/helm-v0.1.5/helm-chart/README.md
+    https://github.com/dmaes/gitlab-redmine-webhook/blob/helm-v0.2.0/helm-chart/README.md
