@@ -9,14 +9,15 @@ import logging.config
 from pythonjsonlogger.json import JsonFormatter
 
 import os
-import re
 import sys
 import uuid
 
 from redminelib import Redmine
 from redminelib.exceptions import ResourceNotFoundError
 
-ISSUE_RE = '(^| |\\n|\\(|\\[)#([0-9]+)(\\]|\\)| |\\n|$)'
+import regex as re
+
+ISSUE_RE = '(^| |,|\\n|\\(|\\[)#([0-9]+)(\\]|\\)| |,|\\n|$)'
 
 redmine_url = os.environ.get('REDMINE_URL')
 redmine_key = os.environ.get('REDMINE_KEY')
@@ -83,10 +84,10 @@ def find_mr_issues(event):
     mr = event['object_attributes']
     issues = []
 
-    for m in re.findall(ISSUE_RE, mr['title']):
+    for m in re.findall(ISSUE_RE, mr['title'], overlapped=True):
         issues.append(m[1])
 
-    for m in re.findall(ISSUE_RE, mr['description']):
+    for m in re.findall(ISSUE_RE, mr['description'], overlapped=True):
         issues.append(m[1])
 
     return set(issues)
@@ -95,10 +96,10 @@ def find_mr_issues(event):
 def find_release_issues(event):
     issues = []
 
-    for m in re.findall(ISSUE_RE, event['description']):
+    for m in re.findall(ISSUE_RE, event['description'], overlapped=True):
         issues.append(m[1])
 
-    for m in re.findall(ISSUE_RE, event['commit']['message']):
+    for m in re.findall(ISSUE_RE, event['commit']['message'], overlapped=True):
         issues.append(m[1])
 
     return set(issues)
@@ -108,7 +109,8 @@ def find_commits_issues(event):
     issueCommits = dict()
 
     for commit in event['commits']:
-        matches = re.findall(ISSUE_RE, commit['message'])
+        matches = re.findall(ISSUE_RE, commit['message'], overlapped=True)
+        log.debug(f"Found issues on commit {commit['id'][0:8]}: {matches}")
         issues = []
         for match in matches:
             issues.append(match[1])

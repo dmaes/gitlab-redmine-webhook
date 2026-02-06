@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ### Changed
 * Bump python to 3.14.3
 
+### Fixed
+* Fix regex matching for multiple issue references
+
 ## [0.2.0] - 2025-12-23
 
 ### Changed
