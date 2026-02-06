@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ### Changed
 * Bump python to 3.14.3
+* Bump gunicorn from 23.0.0 to 25.0.1
+* Bump certifi from 2025.11.12 to 2026.1.4
+* Bump packaging from 25.0 to 26.0
+* Bump urllib3 from 2.5.0 to 2.6.3
+* Bump werkzeug from 3.1.3 to 3.1.5
 
 ### Fixed
 * Fix regex matching for multiple issue references
