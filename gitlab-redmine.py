@@ -17,8 +17,6 @@ from redminelib.exceptions import ResourceNotFoundError
 
 import regex as re
 
-ISSUE_RE = '(^| |,|\\n|\\(|\\[)#([0-9]+)(\\]|\\)| |,|\\n|$)'
-
 redmine_url = os.environ.get('REDMINE_URL')
 redmine_key = os.environ.get('REDMINE_KEY')
 my_user_id = int(os.environ.get('REDMINE_USER_ID'))
@@ -74,6 +72,32 @@ log.addHandler(app_log_handler)
 log.setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
 
 
+def find_issues(text)
+    issue_re = '(^| |,|\\n|\\(|\\[)#(?<issue>[0-9]+)(\\]|\\)| |,|\\n|$)'
+
+    issues = []
+
+    for m in re.finditer(issue_re, text, overlapped=True):
+        issue = m.group('issue')
+        log.debug(f"Found issue '{issue}' {m}")
+        issues.append(issue)
+
+        # linked_issue_re = f"^\\[#{issue}]\\(.+\\)"
+        # linked_issue_match = re.match(linked_issue_re, text[m.start():])
+        # if linked_issue_match:
+        #     redmine_linked_issue_re = f"^\\[#{issue}]\\({redmine_url}/issues/{issue}((\\?|#|/).*)?\\)"
+        #     if re.match(redmine_linked_issue_re, text[m.start():]):
+        #         log.debug(f"Issue '{issue}' {linked_issue_match} is a link, and links to the configured redmine. Will include issue"
+        #         issues.append(issue)
+        #     else:
+        #         log.debug(f"Issue '{issue}' {linked_issue_match} is a link, but but does not link to the configured redmine. Will not include issue")
+        # else:
+        #     log.debug(f"Issue '{issue}' is not a link. Will include issue"
+        #     issues.append(issue)
+
+    return set(issues)
+
+
 def get_event_project_md_link(event):
     path = event['project']['path_with_namespace']
     web_link = event['project']['web_url']
@@ -82,39 +106,33 @@ def get_event_project_md_link(event):
 
 def find_mr_issues(event):
     mr = event['object_attributes']
-    issues = []
 
-    for m in re.findall(ISSUE_RE, mr['title'], overlapped=True):
-        issues.append(m[1])
+    title_issues = find_issues(mr['title'])
+    log.debug(f"Found issues in MR title: {title_issues}")
 
-    for m in re.findall(ISSUE_RE, mr['description'], overlapped=True):
-        issues.append(m[1])
+    description_issues = find_issues(mr['description'])
+    log.debug(f"Found issues in MR description: {description_issues}")
 
-    return set(issues)
+    return set(title_issues + description_issues)
 
 
 def find_release_issues(event):
-    issues = []
+    description_issues = find_issues(event['description'])
+    log.debug(f"Found issues in Release description: {description_issues}")
 
-    for m in re.findall(ISSUE_RE, event['description'], overlapped=True):
-        issues.append(m[1])
+    commit_issues = find_issues(event['commit']['message'])
+    log.debug(f"Found issues in Release commit message: {commit_issues}")
 
-    for m in re.findall(ISSUE_RE, event['commit']['message'], overlapped=True):
-        issues.append(m[1])
-
-    return set(issues)
+    return set(description_issues + commit_issues)
 
 
 def find_commits_issues(event):
     issueCommits = dict()
 
     for commit in event['commits']:
-        matches = re.findall(ISSUE_RE, commit['message'], overlapped=True)
-        log.debug(f"Found issues on commit {commit['id'][0:8]}: {matches}")
-        issues = []
-        for match in matches:
-            issues.append(match[1])
-        for issue in set(issues):
+        issues = find_issue(commit['message'])
+        log.debug(f"Found issues on commit {commit['id'][0:8]}: {issues}")
+        for issue in issues:
             if issue not in issueCommits:
                 issueCommits[issue] = []
             issueCommits[issue].append(commit)
