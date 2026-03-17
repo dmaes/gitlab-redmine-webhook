@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import flask
 from flask import Flask, request
 from flask_restful import Resource, Api
@@ -72,7 +74,7 @@ log.addHandler(app_log_handler)
 log.setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
 
 
-def find_issues(text)
+def find_issues(text):
     issue_re = '(^| |,|\\n|\\(|\\[)#(?<issue>[0-9]+)(\\]|\\)| |,|\\n|$)'
 
     issues = []
@@ -130,7 +132,7 @@ def find_commits_issues(event):
     issueCommits = dict()
 
     for commit in event['commits']:
-        issues = find_issue(commit['message'])
+        issues = find_issues(commit['message'])
         log.debug(f"Found issues on commit {commit['id'][0:8]}: {issues}")
         for issue in issues:
             if issue not in issueCommits:
@@ -196,7 +198,8 @@ def should_append_commits_to_last_note(issue, event):
 
     try:
         *_, last_journal = issue.journals
-        if last_journal.user.id == my_user_id and header_re.match(last_journal.notes):
+        if (last_journal.user.id == my_user_id and header_re.match(last_journal.notes)
+            and last_journal.created_on.date() == datetime.today().date()):
             return last_journal
     except ValueError:
         pass
