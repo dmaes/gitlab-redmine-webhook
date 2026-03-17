@@ -77,12 +77,12 @@ log.setLevel(os.environ.get('LOG_LEVEL', 'INFO'))
 def find_issues(text):
     issue_re = '(^| |,|\\n|\\(|\\[)#(?<issue>[0-9]+)(\\]|\\)| |,|\\n|$)'
 
-    issues = []
+    issues = set()
 
     for m in re.finditer(issue_re, text, overlapped=True):
         issue = m.group('issue')
         log.debug(f"Found issue '{issue}' {m}")
-        issues.append(issue)
+        issues.add(issue)
 
         # linked_issue_re = f"^\\[#{issue}]\\(.+\\)"
         # linked_issue_match = re.match(linked_issue_re, text[m.start():])
@@ -97,7 +97,7 @@ def find_issues(text):
         #     log.debug(f"Issue '{issue}' is not a link. Will include issue"
         #     issues.append(issue)
 
-    return set(issues)
+    return issues
 
 
 def get_event_project_md_link(event):
@@ -109,23 +109,31 @@ def get_event_project_md_link(event):
 def find_mr_issues(event):
     mr = event['object_attributes']
 
+    issues = set()
+
     title_issues = find_issues(mr['title'])
     log.debug(f"Found issues in MR title: {title_issues}")
+    issues.update(title_issues)
 
     description_issues = find_issues(mr['description'])
     log.debug(f"Found issues in MR description: {description_issues}")
+    issues.update(description_issues)
 
-    return set(title_issues + description_issues)
+    return issues
 
 
 def find_release_issues(event):
+    issues = set()
+
     description_issues = find_issues(event['description'])
     log.debug(f"Found issues in Release description: {description_issues}")
+    issues.update(description_issues)
 
     commit_issues = find_issues(event['commit']['message'])
     log.debug(f"Found issues in Release commit message: {commit_issues}")
+    issues.update(commit_issues)
 
-    return set(description_issues + commit_issues)
+    return issues
 
 
 def find_commits_issues(event):
@@ -136,8 +144,8 @@ def find_commits_issues(event):
         log.debug(f"Found issues on commit {commit['id'][0:8]}: {issues}")
         for issue in issues:
             if issue not in issueCommits:
-                issueCommits[issue] = []
-            issueCommits[issue].append(commit)
+                issueCommits[issue] = set()
+            issueCommits[issue].add(commit)
 
     return issueCommits
 
