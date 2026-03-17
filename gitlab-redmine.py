@@ -122,6 +122,12 @@ def find_mr_issues(event):
     return issues
 
 
+def find_mr_note_issues(event):
+    issues = find_issues(event['object_attributes']['description'])
+    log.debug(f"Found issues in MR note: {issues}")
+    return issues
+
+
 def find_release_issues(event):
     issues = set()
 
@@ -150,10 +156,19 @@ def find_commits_issues(event):
     return issueCommits
 
 
-def get_mr_link(event):
-    mr = event['object_attributes']
-    project_path = event['project']['path_with_namespace']
+def get_mr_link(project, mr):
+    project_path = project['path_with_namespace']
     return f"[{project_path}!{mr['iid']}]({mr['url']})"
+
+
+def get_mr_note_link(project, mr, note):
+    project_path = project['path_with_namespace']
+    return f"[{project_path}!{mr['iid']}]({note['url']})"
+
+
+def get_mr_link_re(project, mr):
+    project_path = project['path_with_namespace']
+    return f"\\[{project_path}\\!{mr['iid']}\\]\\({mr['url']}(#.+)?\\)"
 
 
 def get_release_link(event):
@@ -161,12 +176,15 @@ def get_release_link(event):
     return f"[{project_path} {event['name']}]({event['url']})"
 
 
-def issue_has_mr_note(issue, event):
-    escaped_link = re.escape(get_mr_link(event))
-    notes_re = re.compile(f"^Merge Request {escaped_link} referencing this issue .+$")
+def issue_has_mr_note(issue, project, mr):
+    mr_link_re = get_mr_link_re(project, mr)
+    mr_re = re.compile(f"^Merge Request {mr_link_re} referencing this issue .+$")
+    mr_note_re = re.compile(f"Issue was mentioned in a comment on Merge Request {mr_link_re}")
 
     for journal in issue.journals:
-        if journal.user.id == my_user_id and notes_re.match(journal.notes):
+        if (journal.user.id == my_user_id and (
+            mr_re.match(journal.notes)
+            or mr_note_re.match(journal.notes))):
             return True
 
     return False
@@ -217,6 +235,7 @@ def should_append_commits_to_last_note(issue, event):
 
 def update_redmine_issue_mr(id, event, private_notes):
     mr = event['object_attributes']
+    project = event['project']
 
     # No need to notify whenever new commits are pushed
     if 'oldrev' in mr:
@@ -231,10 +250,36 @@ def update_redmine_issue_mr(id, event, private_notes):
     action = f"{action}d" if action[-1] == 'e' else f"{action}ed"
 
     # Not need to notify on every update
-    if action == 'updated' and issue_has_mr_note(issue, event):
+    if action == 'updated' and issue_has_mr_note(issue, project, mr):
         return "skipped"
 
-    issue.notes = f"Merge Request {get_mr_link(event)} referencing this issue has been {action}."
+    mr_link = get_mr_link(project, mr)
+    issue.notes = f"Merge Request {mr_link} referencing this issue has been {action}."
+
+    issue.private_notes = private_notes
+    issue.save()
+
+    return "updated"
+
+
+def update_redmine_issue_mr_note(id, event, private_notes):
+    note = event['object_attributes']
+    mr = event['merge_request']
+    project = event['project']
+
+    try:
+        issue = redmine.issue.get(id)
+    except ResourceNotFoundError:
+        log.info(f"Could not find issue #{issue.id}")
+        return "not found"
+
+    if issue_has_mr_note(issue, project, mr):
+        log.debug(f"Found existing note on #{issue.id} for MR {mr['iid']} in {project['web_url']}")
+        return "skipped"
+
+    mr_note_link = get_mr_note_link(project, mr, note)
+    log.debug(f"Creating note on #{issue.id} for MR {mr['iid']} note {note['id']} in {project['web_url']}")
+    issue.notes = f"Issue was mentioned in a comment on Merge Request {mr_note_link}"
 
     issue.private_notes = private_notes
     issue.save()
@@ -327,6 +372,8 @@ class Hook(Resource):
 
         if event == 'Merge Request Hook':
             return self.handle_mr()
+        if event == 'Note Hook':
+            return self.handle_note()
         elif event == 'Push Hook':
             return self.handle_push()
         elif event == 'Release Hook':
@@ -341,6 +388,19 @@ class Hook(Resource):
         res = dict()
         for issue in find_mr_issues(event):
             res[issue] = update_redmine_issue_mr(issue, event, private_notes)
+        return {'issues': res}
+
+    def handle_note(self):
+        event = request.get_json()
+        private_notes = (request.headers.get('X-GitlabRedmine-Private-Notes', '').lower() == 'true')
+        noteable_type = event['object_attributes']['noteable_type']
+        res = dict()
+        if noteable_type == 'MergeRequest':
+            for issue in find_mr_note_issues(event):
+                res[issue] = update_redmine_issue_mr_note(issue, event, private_notes)
+        else:
+            log.error(f"Unsupported noteable type '{noteable_type}'")
+            return {'error': f"Unsupported noteable type '{noteable_type}'"}, 400
         return {'issues': res}
 
     def handle_push(self):
