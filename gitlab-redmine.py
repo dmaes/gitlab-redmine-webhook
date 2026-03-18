@@ -150,8 +150,8 @@ def find_commits_issues(event):
         log.debug(f"Found issues on commit {commit['id'][0:8]}: {issues}")
         for issue in issues:
             if issue not in issueCommits:
-                issueCommits[issue] = set()
-            issueCommits[issue].add(commit)
+                issueCommits[issue] = []
+            issueCommits[issue].append(commit)
 
     return issueCommits
 
