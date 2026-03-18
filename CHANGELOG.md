@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-18
+
 ### Changed
 * Only append commits to last note if the note was created on the same day as the push event.
 
