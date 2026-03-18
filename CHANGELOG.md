@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ### Changed
 * Only append commits to last note if the note was created on the same day as the push event.
 
+### Added
+* Support MR comments
+
 ## [0.2.1] - 2026-01-06
 
 ### Changed
