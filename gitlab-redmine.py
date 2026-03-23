@@ -361,15 +361,17 @@ class Hook(Resource):
         event = request.headers.get("X-Gitlab-Event")
         glab_instance = request.headers.get("X-Gitlab-Instance")
         event_uuid = request.headers.get("X-Gitlab-Event-Uuid")
-        log.info(f"Received '{event}' event '{event_uuid}' from {glab_instance}")
+        project = request.get_json()['project']['path_with_namespace']
+        project_id = request.get_json()['project']['id']
+        log.info(f"Received '{event}' event '{event_uuid}' from Gitlab {glab_instance} Project {project} ({project_id})")
         headers_dict = {k: v for k, v in request.headers.to_wsgi_list()}
         log.debug(f"Headers: {headers_dict}")
         log.debug(f"Body: {json.dumps(request.get_json())}")
 
     def post(self):
-        event = request.headers.get("X-Gitlab-Event")
         self.log_request()
 
+        event = request.headers.get("X-Gitlab-Event")
         if event == 'Merge Request Hook':
             return self.handle_mr()
         if event == 'Note Hook':
